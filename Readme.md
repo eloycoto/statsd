@@ -27,6 +27,6 @@ And now you can follow the kamailio instructions. http://www.kamailio.org/wiki/i
 Module parameters
 ------------------
 
-You can find the module parameters in the [Doxygen docs](docs/statsd.txt)
+You can find the module parameters in the [Doxygen docs](doc/statsd.txt)
 
 [I wrote this small post, with some info, how to use and ideas. ](http://acalustra.com/kamailio-statsd-better-statistics-in-your-voip-platform.html) enjoy!
