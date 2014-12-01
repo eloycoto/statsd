@@ -34,7 +34,7 @@ static cmd_export_t commands[] = {
 	{"statsd_stop", (cmd_function)func_time_end, 1, 0, 0, ANY_ROUTE},
 	{"statsd_incr", (cmd_function)func_incr, 1, 0, 0, ANY_ROUTE},
 	{"statsd_decr", (cmd_function)func_decr, 1, 0, 0, ANY_ROUTE},
-	{"statsd_set", (cmd_function)func_set, 1, 0, 0, ANY_ROUTE},
+	{"statsd_set", (cmd_function)func_set, 2, 0, 0, ANY_ROUTE},
     {0, 0, 0, 0, 0, 0}
 };
 
@@ -51,7 +51,7 @@ struct module_exports exports = {
     parameters,      // exported parameters
     NULL,            // exported statistics
     NULL,            // exported MI functions
-    NULL,            // exported pseudo-variables
+    NULL,            // exported seudo-variables
     NULL,            // extra processes
     mod_init,        // module init function (before fork. kids will inherit)
     NULL,            // reply processing function
@@ -110,14 +110,14 @@ static int func_time_start(struct sip_msg *msg, char *key)
 static int func_time_end(struct sip_msg *msg, char *key)
 {
     char unix_time[20];
-    get_milliseconds(unix_time);
-    LM_ERR("STOP %s",unix_time);
     char *endptr;
     long int start_time;
     int result;
 
     struct search_state st;
-    /* struct avp_user *prev_avp; */
+
+    get_milliseconds(unix_time);
+    LM_ERR("STOP %s",unix_time);
     avp_t* prev_avp;
 
     int_str avp_value, avp_name;
@@ -158,8 +158,10 @@ static int func_decr(struct sip_msg *msg, char *key)
 
 char* get_milliseconds(char *dst){
     struct timeval tv;
+    long int millis;
+
     gettimeofday(&tv, NULL);
-    long int millis = (tv.tv_sec * (int)1000) + (tv.tv_usec / 1000);
-    sprintf(dst, "%ld", millis);
+    millis = (tv.tv_sec * (int)1000) + (tv.tv_usec / 1000);
+    snprintf(dst, 21, "%ld", millis);
     return dst;
 }

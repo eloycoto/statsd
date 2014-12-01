@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <math.h>
+#include <errno.h>
 
 #include "../../sr_module.h"
 
@@ -44,12 +45,13 @@ static StatsConnection statsd_connection = {
 static Bool statsd_connect(void){
 
     struct addrinfo *serverAddr;
+    int rc, error;
 
     if (statsd_socket.sock > 0){
         return True;
     }
 
-    int error = getaddrinfo(
+    error = getaddrinfo(
         statsd_connection.ip, statsd_connection.port,
         NULL, &serverAddr);
     if (error != 0)
@@ -64,7 +66,7 @@ static Bool statsd_connect(void){
         return False;
     }
 
-    int rc = connect(
+    rc = connect(
         statsd_socket.sock, serverAddr->ai_addr, serverAddr->ai_addrlen);
     if (rc <0){
         LM_ERR("could not initiate a connect to statsd\n");
@@ -74,58 +76,60 @@ static Bool statsd_connect(void){
 }
 
 static int send_command(char *command){
+    int send_result;
+
     if (!statsd_connect()){
         LM_ERR("Connection lost to statsd");
         return False;
     }
-    if (send(statsd_socket.sock, command, strlen(command), 0) < 0){
-        LM_ERR("could not send the correct info to statsd");
-        return False;
+
+    send_result = send(statsd_socket.sock, command, strlen(command), 0);
+    if ( send_result < 0){
+        LM_ERR("could not send the correct info to statsd (%i| %s)",
+            send_result, strerror(errno));
+        return True;
     }
-    LM_DBG("Sending to statsd (%s)", command);
+    LM_DBG("Sent to statsd (%s)", command);
     return True;
 }
 
 static int statsd_set(char *key, char *value){
    char* end = 0;
    char command[254];
-   int val = strtol(value, &end, 0);
+   int val;
+   val = strtol(value, &end, 0);
    if (*end){
-       LM_ERR("statsd_gauge can't use the provide value(%s)", value);
+       LM_ERR("statsd_count could not  use the provide value(%s)", value);
        return False;
    }
-   sprintf(command, "%s:%i|s\n", key, val);
+   snprintf(command, sizeof command, "%s:%i|s\n", key, val);
    return send_command(command);
 }
 
 
 static int statsd_gauge(char *key, char *value){
-   /* char* end = 0; */
    char command[254];
-   /* int val = strtol(value, &end, 0); */
-   /* if (*end){ */
-   /*     LM_ERR("statsd_gauge can't use the provide value(%s)",value); */
-   /*     return False; */
-   /* } */
-   sprintf(command, "%s:%s|g\n", key, value);
+   snprintf(command, sizeof command, "%s:%s|g\n", key, value);
    return send_command(command);
 }
 
 static int statsd_count(char *key, char *value){
    char* end = 0;
    char command[254];
-   int val = strtol(value, &end, 0);
+   int val;
+
+   val = strtol(value, &end, 0);
    if (*end){
-       LM_ERR("statsd_count could not  use the provide value(%s)",value);
+       LM_ERR("statsd_count could not  use the provide value(%s)", value);
        return False;
    }
-   sprintf(command, "%s:%i|c\n", key, val);
+   snprintf(command, sizeof command, "%s:%i|c\n", key, val);
    return send_command(command);
 }
 
 static int statsd_timing(char *key, int value){
    char command[254];
-   sprintf(command,"%s:%i|ms\n",key,value);
+   snprintf(command, sizeof command, "%s:%i|ms\n", key, value);
    return send_command(command);
 }
 
@@ -137,8 +141,8 @@ static int statsd_init(char *ip, char *port){
     if (port != NULL ){
        statsd_connection.port = port;
     }
-    LM_ERR("Statsd_init ip %s",statsd_connection.ip);
-    LM_ERR("Statsd_init port %s",statsd_connection.port);
+    LM_ERR("Statsd_init ip %s", statsd_connection.ip);
+    LM_ERR("Statsd_init port %s", statsd_connection.port);
     return statsd_connect();
 }
 

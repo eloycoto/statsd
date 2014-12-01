@@ -20,7 +20,7 @@
 
     <section>
         <title>Parameters</title>
-        <section id="serverIP">
+        <section id="statsd.p.serverIP">
             <title><varname>ip</varname>(string)</title>
             <para>
             Statsd server ip
@@ -35,7 +35,7 @@ modparam("statsd", "ip", "127.0.0.1")
             </example>
         </section>
 
-        <section id="serverPort">
+        <section id="statsd.p.serverPort">
             <title><varname>port</varname>(int)</title>
             <para>
             Statsd server ip
@@ -53,7 +53,7 @@ modparam("statsd", "port", "8125")
 
     <section>
         <title>Functions</title>
-        <section id="statsd_set">
+        <section id="statsd.f.statsd_set">
             <title>
                 <function moreinfo="none">statsd_set(key, value)</function>
             </title>
@@ -80,7 +80,7 @@ failure_route[tryagain] {
             </example>
         </section>
 
-        <section id="statsd_gauge">
+        <section id="statsd.f.statsd_gauge">
             <title>
                 <function moreinfo="none">statsd_gauge(key, value)</function>
             </title>
@@ -107,7 +107,7 @@ route [gauge_method]{
             </example>
         </section>
 
-        <section id="statsd_start">
+        <section id="statsd.f.statsd_start">
             <title>
                 <function moreinfo="none">statsd_start(key)</function>
             </title>
@@ -133,7 +133,7 @@ statsd_stop("long_mysql_query");
         </section>
 
 
-        <section id="statsd_stop">
+        <section id="statsd.f.statsd_stop">
             <title>
                 <function moreinfo="none">statsd_stop(key)</function>
             </title>
@@ -155,7 +155,7 @@ statsd_stop("long_mysql_query");
             </example>
         </section>
 
-        <section id="statsd_incr">
+        <section id="statsd.f.statsd_incr">
             <title>
                 <function moreinfo="none">statsd_incr(key)</function>
             </title>
@@ -177,7 +177,7 @@ if(geoip_match("$si", "src")){
             </example>
         </section>
 
-        <section id="statsd_decr">
+        <section id="statsd.f.statsd_decr">
             <title>
                 <function moreinfo="none">statsd_decr(key)</function>
             </title>
